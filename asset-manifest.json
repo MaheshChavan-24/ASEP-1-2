@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/ASEP-1-2/static/css/main.5fdca11c.css",
+    "main.js": "/ASEP-1-2/static/js/main.bf2dc18b.js",
+    "index.html": "/ASEP-1-2/index.html",
+    "main.5fdca11c.css.map": "/ASEP-1-2/static/css/main.5fdca11c.css.map",
+    "main.bf2dc18b.js.map": "/ASEP-1-2/static/js/main.bf2dc18b.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.5fdca11c.css",
+    "static/js/main.bf2dc18b.js"
+  ]
+}
