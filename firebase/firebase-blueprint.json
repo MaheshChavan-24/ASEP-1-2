@@ -1,0 +1,44 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["client", "worker", "admin"] },
+        "name": { "type": "string" },
+        "phone": { "type": "string" },
+        "verificationStatus": { "type": "string", "enum": ["pending", "verified", "rejected"] }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "Job": {
+      "title": "Job",
+      "description": "Bounty job",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "category": { "type": "string" },
+        "budget": { "type": "number" },
+        "isNegotiable": { "type": "boolean" },
+        "status": { "type": "string", "enum": ["open", "accepted", "completed", "cancelled"] },
+        "clientId": { "type": "string" },
+        "workerId": { "type": "string" }
+      },
+      "required": ["title", "description", "category", "status", "clientId"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "/jobs/{jobId}": {
+      "schema": "Job",
+      "description": "Bounty jobs"
+    }
+  }
+}

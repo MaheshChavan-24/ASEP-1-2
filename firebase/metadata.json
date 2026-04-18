@@ -1,0 +1,5 @@
+{
+  "name": "ServiceConnect",
+  "description": "Hyper-Local Hybrid Gig & Bounty Platform",
+  "requestFramePermissions": ["geolocation"]
+}

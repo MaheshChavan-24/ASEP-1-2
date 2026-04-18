@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import RegisterView
+from .views import RegisterView, GoogleLoginView
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
@@ -15,4 +15,7 @@ urlpatterns = [
     
     # 3. Refresh Token: http://127.0.0.1:8000/api/users/token/refresh/
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+
+    # 4. Google Login: http://127.0.0.1:8000/api/users/google-login/
+    path('google-login/', GoogleLoginView.as_view(), name='google_login'),
 ]
