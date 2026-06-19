@@ -415,7 +415,7 @@ function WorkerProfile({ lang, user, setUser, fetchCurrentUser }) {
 export default function App() {
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
-    googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
+    googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY || "",
     libraries: libraries
   });
   const [autocomplete, setAutocomplete] = useState(null);
