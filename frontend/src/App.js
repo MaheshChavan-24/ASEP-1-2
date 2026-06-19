@@ -64,7 +64,8 @@ const translations = {
     submitReview: "Submit Review",
     rating: "Rating",
     comment: "Comment",
-    waiting: "Waiting for a worker..."
+    waiting: "Waiting for a worker...",
+
   },
   hi: {
     serviceConnect: "सर्विस कनेक्ट",
@@ -1258,8 +1259,8 @@ export default function App() {
                                     type="button"
                                     onClick={() => setRequestFormData({ ...requestFormData, preferred_time_slot: slot })}
                                     className={`py-2 px-1 text-[10px] font-bold rounded-lg border transition ${requestFormData.preferred_time_slot === slot
-                                        ? 'bg-indigo-600 text-white border-indigo-600 shadow'
-                                        : 'bg-white text-gray-600 border-gray-200 hover:border-indigo-300'
+                                      ? 'bg-indigo-600 text-white border-indigo-600 shadow'
+                                      : 'bg-white text-gray-600 border-gray-200 hover:border-indigo-300'
                                       }`}
                                   >
                                     {slot.split(' - ')[0]}
@@ -1473,9 +1474,9 @@ export default function App() {
                         <div className="space-y-3">
                           {serviceRequests.map(req => (
                             <div key={req.id} className={`p-5 bg-white border-l-4 shadow-sm rounded-xl ${req.status === 'completed' ? 'border-green-500' :
-                                req.status === 'accepted' || req.status === 'scheduled' ? 'border-blue-500' :
-                                  req.status === 'rejected' ? 'border-red-500' :
-                                    'border-yellow-500'
+                              req.status === 'accepted' || req.status === 'scheduled' ? 'border-blue-500' :
+                                req.status === 'rejected' ? 'border-red-500' :
+                                  'border-yellow-500'
                               }`}>
                               <div className="flex justify-between items-start">
                                 <div>
@@ -1491,10 +1492,10 @@ export default function App() {
                                   )}
                                 </div>
                                 <span className={`text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider ${req.status === 'completed' ? 'bg-green-100 text-green-700' :
-                                    req.status === 'accepted' ? 'bg-blue-100 text-blue-700' :
-                                      req.status === 'scheduled' ? 'bg-purple-100 text-purple-700' :
-                                        req.status === 'rejected' ? 'bg-red-100 text-red-700' :
-                                          'bg-yellow-100 text-yellow-700'
+                                  req.status === 'accepted' ? 'bg-blue-100 text-blue-700' :
+                                    req.status === 'scheduled' ? 'bg-purple-100 text-purple-700' :
+                                      req.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                                        'bg-yellow-100 text-yellow-700'
                                   }`}>{req.status}</span>
                               </div>
                             </div>
@@ -1961,9 +1962,9 @@ export default function App() {
                     ) : (
                       serviceRequests.map(req => (
                         <div key={req.id} className={`p-6 bg-white border-l-4 shadow-sm rounded-xl ${req.status === 'completed' ? 'border-green-500' :
-                            req.status === 'accepted' || req.status === 'scheduled' ? 'border-blue-500' :
-                              req.status === 'rejected' ? 'border-red-500' :
-                                'border-yellow-500'
+                          req.status === 'accepted' || req.status === 'scheduled' ? 'border-blue-500' :
+                            req.status === 'rejected' ? 'border-red-500' :
+                              'border-yellow-500'
                           }`}>
                           <div className="flex justify-between items-start mb-3">
                             <div>
@@ -1971,10 +1972,10 @@ export default function App() {
                               <p className="text-xs text-gray-500 mt-0.5">{req.trade_category}</p>
                             </div>
                             <span className={`text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider ${req.status === 'completed' ? 'bg-green-100 text-green-700' :
-                                req.status === 'accepted' ? 'bg-blue-100 text-blue-700' :
-                                  req.status === 'scheduled' ? 'bg-purple-100 text-purple-700' :
-                                    req.status === 'rejected' ? 'bg-red-100 text-red-700' :
-                                      'bg-yellow-100 text-yellow-700'
+                              req.status === 'accepted' ? 'bg-blue-100 text-blue-700' :
+                                req.status === 'scheduled' ? 'bg-purple-100 text-purple-700' :
+                                  req.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                                    'bg-yellow-100 text-yellow-700'
                               }`}>{req.status}</span>
                           </div>
                           <p className="text-sm text-gray-600">{req.description}</p>
