@@ -5,8 +5,7 @@ from django.utils import timezone
 from users.models import Notification
 from .models import Job, Review
 from .serializers import JobSerializer, ReviewSerializer
-from math import cos, asin, sqrt, pi
-
+import math 
 
 class JobCreateView(generics.CreateAPIView):
     """Clients use this to post a job"""
@@ -23,9 +22,60 @@ class JobListView(generics.ListAPIView):
     serializer_class = JobSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    def get_queryset(self):
-        # We only show jobs that are still 'pending'
-        return Job.objects.filter(status='pending')
+    def haversine_distance(self, lat1, lon1, lat2, lon2):
+        # Earth radius in kilometers
+        R = 6371.0
+
+        lat1_rad = math.radians(lat1)
+        lon1_rad = math.radians(lon1)
+        lat2_rad = math.radians(lat2)
+        lon2_rad = math.radians(lon2)
+
+        dlat = lat2_rad - lat1_rad
+        dlon = lon2_rad - lon1_rad
+
+        a = math.sin(dlat / 2)**2 + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(dlon / 2)**2
+        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+        return R * c
+
+    def list(self, request, *args, **kwargs):
+        queryset = Job.objects.filter(status='pending')
+        lat_str = request.query_params.get('lat')
+        lon_str = request.query_params.get('lon')
+
+        if not lat_str or not lon_str:
+            # If no location provided, we can either return all jobs or empty.
+            # But per user request, worker must provide location.
+            return Response({"error": "Location coordinates (lat, lon) are required to view available jobs."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            worker_lat = float(lat_str)
+            worker_lon = float(lon_str)
+        except ValueError:
+            return Response({"error": "Invalid coordinate format."}, status=status.HTTP_400_BAD_REQUEST)
+
+        nearby_jobs = []
+        for job in queryset:
+            if job.latitude is None or job.longitude is None:
+                continue
+
+            distance = self.haversine_distance(worker_lat, worker_lon, job.latitude, job.longitude)
+            
+            # Filter by urgency
+            if job.urgency_level == 'Emergency' and distance > 5.0:
+                continue
+            elif job.urgency_level == 'Standard' and distance > 30.0:
+                continue
+
+            serializer = self.get_serializer(job)
+            job_data = serializer.data
+            job_data['distance_km'] = round(distance, 2)
+            nearby_jobs.append(job_data)
+
+        # Sort by closest distance
+        nearby_jobs.sort(key=lambda x: x['distance_km'])
+
+        return Response(nearby_jobs, status=status.HTTP_200_OK)
 
 class AcceptJobView(APIView):
     """Workers use this to claim a job"""

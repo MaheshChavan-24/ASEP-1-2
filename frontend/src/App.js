@@ -3,7 +3,7 @@ import axios from 'axios';
 import { signInWithPopup } from 'firebase/auth';
 import { auth, googleProvider } from './firebase';
 import { useJsApiLoader, GoogleMap, Marker, Autocomplete } from '@react-google-maps/api';
-import NearbyWorkers from './components/NearbyWorkers';
+
 
 const libraries = ['places'];
 
@@ -495,10 +495,32 @@ export default function App() {
   const fetchAvailableJobs = async () => {
     const token = localStorage.getItem('access_token');
     if (!token) return;
-    try {
-      const res = await axios.get(`${JOB_API}available/`, { headers: { Authorization: `Bearer ${token}` } });
-      setAvailableJobs(res.data);
-    } catch (err) { console.error("Fetch error"); }
+
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser. Please enable location to view available jobs.");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        try {
+          const res = await axios.get(`${JOB_API}available/?lat=${latitude}&lon=${longitude}`, { headers: { Authorization: `Bearer ${token}` } });
+          setAvailableJobs(res.data);
+        } catch (err) {
+          const errMsg = err.response?.data?.error || "Fetch error";
+          console.error(errMsg);
+        }
+      },
+      (err) => {
+        alert("Please enable location permissions to view available jobs.");
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      }
+    );
   };
 
   const fetchClientJobs = async () => {
@@ -1122,7 +1144,7 @@ export default function App() {
                 <div className="flex border-b border-gray-200 mb-6">
                   <button onClick={() => setActiveTab('services')} className={`py-2 px-4 font-bold border-b-2 transition ${activeTab === 'services' ? 'text-indigo-600 border-indigo-600' : 'text-gray-500 border-transparent hover:text-indigo-600'}`}>{t.services}</button>
                   <button onClick={() => setActiveTab('bookings')} className={`py-2 px-4 font-bold border-b-2 transition ${activeTab === 'bookings' ? 'text-indigo-600 border-indigo-600' : 'text-gray-500 border-transparent hover:text-indigo-600'}`}>{t.activeBookings}</button>
-                  <button onClick={() => setActiveTab('nearby')} className={`py-2 px-4 font-bold border-b-2 transition ${activeTab === 'nearby' ? 'text-indigo-600 border-indigo-600' : 'text-gray-500 border-transparent hover:text-indigo-600'}`}>Nearby Workers</button>
+
                   <button onClick={() => setActiveTab('profile')} className={`py-2 px-4 font-bold border-b-2 transition ${activeTab === 'profile' ? 'text-indigo-600 border-indigo-600' : 'text-gray-500 border-transparent hover:text-indigo-600'}`}>{t.myDocuments}</button>
                   <button onClick={() => setActiveTab('reviews')} className={`py-2 px-4 font-bold border-b-2 transition ${activeTab === 'reviews' ? 'text-indigo-600 border-indigo-600' : 'text-gray-500 border-transparent hover:text-indigo-600'}`}>{t.reviews}</button>
                 </div>
@@ -1515,9 +1537,7 @@ export default function App() {
                     )}
                   </div>
                 )}
-                {activeTab === 'nearby' && (
-                  <NearbyWorkers />
-                )}
+
               </>
             )}
 
@@ -1540,13 +1560,22 @@ export default function App() {
                   <div className="space-y-4">
                     {availableJobs.map(job => (
                       <div key={job.id} className="bg-indigo-50 p-6 rounded-3xl border border-indigo-100 flex justify-between items-center">
-                        <div><h4 className="text-xl font-bold text-gray-800">{job.title}</h4><p className="text-gray-500 text-sm">{job.description}</p></div>
-                        <div className="text-right"><div className="text-right">
-                          <p className="text-2xl font-black text-indigo-600">
-                            {Number(job.budget) === 0 ? "Negotiable" : `₹${job.budget}`}
-                          </p>
-                          {/* ... buttons ... */}
+                        <div>
+                          <h4 className="text-xl font-bold text-gray-800">{job.title}</h4>
+                          <p className="text-gray-500 text-sm">{job.description}</p>
+                          {job.distance_km !== undefined && (
+                            <p className="text-indigo-600 font-bold mt-2 text-xs uppercase tracking-widest">
+                              📍 {job.distance_km} km away
+                            </p>
+                          )}
                         </div>
+                        <div className="text-right">
+                          <div className="text-right">
+                            <p className="text-2xl font-black text-indigo-600">
+                              {Number(job.budget) === 0 ? "Negotiable" : `₹${job.budget}`}
+                            </p>
+                            {/* ... buttons ... */}
+                          </div>
                           <button
                             onClick={() => {
                               if (user?.verification_status !== 'verified') {

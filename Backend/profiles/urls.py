@@ -9,7 +9,6 @@ from .views import (
     ServiceRequestCreateView,
     ServiceRequestListView,
     ServiceRequestUpdateView,
-    FetchNearbyWorkersView,
 )
 
 urlpatterns = [
@@ -36,6 +35,4 @@ urlpatterns = [
     # PATCH: Update a service request status
     path('service-requests/<int:pk>/', ServiceRequestUpdateView.as_view(), name='service-request-update'),
 
-    # --- GEOSPATIAL PROXIMITY ---
-    path('nearby-workers/', FetchNearbyWorkersView.as_view(), name='nearby-workers'),
 ]
