@@ -161,7 +161,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
 ]
 if os.environ.get('FRONTEND_URL'):
-    CORS_ALLOWED_ORIGINS.append(os.environ.get('FRONTEND_URL'))
+    # Remove trailing slash because django-cors-headers strictly forbids paths
+    CORS_ALLOWED_ORIGINS.append(os.environ.get('FRONTEND_URL').rstrip('/'))
 
 # Or to simply allow all for testing during deployment:
 CORS_ALLOW_ALL_ORIGINS = True
@@ -177,3 +178,5 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # Razorpay Credentials Configuration
 RAZORPAY_KEY_ID = os.environ.get('RAZORPAY_KEY_ID', 'rzp_test_SvZfdo39MfGr42')
 RAZORPAY_KEY_SECRET = os.environ.get('RAZORPAY_KEY_SECRET', 'dRt8GDuoal0hGqiY4DRpw1dx')
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
