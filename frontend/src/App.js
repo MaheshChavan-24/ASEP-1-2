@@ -185,8 +185,8 @@ function WorkerProfile({ lang, user, setUser, fetchCurrentUser }) {
   const [linking, setLinking] = useState(false);
   const [showLinkForm, setShowLinkForm] = useState(false);
 
-  useEffect(() => { 
-    fetchDocuments(); 
+  useEffect(() => {
+    fetchDocuments();
     if (fetchCurrentUser) fetchCurrentUser();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -252,7 +252,7 @@ function WorkerProfile({ lang, user, setUser, fetchCurrentUser }) {
     }
     if (Number(user?.wallet_balance) <= 0) return alert("Nothing to withdraw!");
     if (!window.confirm(`Request payout of ₹${user?.wallet_balance} to your bank account?`)) return;
-    
+
     const token = localStorage.getItem('access_token');
     try {
       const res = await axios.post(`${JOB_API}payout/`, {
@@ -277,24 +277,24 @@ function WorkerProfile({ lang, user, setUser, fetchCurrentUser }) {
             <h3 className="text-4xl font-black mt-2">₹{Number(user?.wallet_balance || 0).toFixed(2)}</h3>
             <p className="text-indigo-100 text-xs mt-1 italic">Funds from completed jobs are instantly released here.</p>
           </div>
-          
+
           <div className="flex flex-col gap-2 w-full md:w-auto">
             {Number(user?.wallet_balance) > 0 ? (
-              <button 
-                onClick={handleWithdraw} 
+              <button
+                onClick={handleWithdraw}
                 className="bg-yellow-400 text-yellow-950 font-bold px-6 py-3 rounded-2xl hover:bg-yellow-300 transition shadow-md whitespace-nowrap text-sm"
               >
                 🏦 Withdraw to Linked Bank
               </button>
             ) : (
-              <button 
-                disabled 
+              <button
+                disabled
                 className="bg-indigo-800 text-indigo-400 cursor-not-allowed font-bold px-6 py-3 rounded-2xl whitespace-nowrap text-sm animate-pulse"
               >
                 🔒 Wallet Empty
               </button>
             )}
-            
+
             {user?.bank_account_number ? (
               <p className="text-[10px] text-center text-indigo-200 font-bold">
                 Linked: {user.bank_name} (****{user.bank_account_number.slice(-4)})
@@ -314,8 +314,8 @@ function WorkerProfile({ lang, user, setUser, fetchCurrentUser }) {
           <div className="flex justify-between items-center mb-4 border-b pb-2">
             <h3 className="text-lg font-bold text-gray-800">Linked Bank Account</h3>
             {user?.bank_account_number && (
-              <button 
-                onClick={() => setShowLinkForm(!showLinkForm)} 
+              <button
+                onClick={() => setShowLinkForm(!showLinkForm)}
                 className="text-xs text-indigo-600 font-bold underline"
               >
                 {showLinkForm ? "Cancel" : "Change Bank Account"}
@@ -327,42 +327,42 @@ function WorkerProfile({ lang, user, setUser, fetchCurrentUser }) {
             <form onSubmit={handleLinkBank} className="space-y-4 bg-indigo-50 p-6 rounded-2xl">
               <div>
                 <label className="block text-xs font-bold text-gray-600 mb-1">Bank Name</label>
-                <input 
-                  type="text" 
-                  placeholder="e.g. State Bank of India" 
-                  value={bankName} 
-                  onChange={e => setBankName(e.target.value)} 
-                  required 
+                <input
+                  type="text"
+                  placeholder="e.g. State Bank of India"
+                  value={bankName}
+                  onChange={e => setBankName(e.target.value)}
+                  required
                   className="w-full p-3 bg-white rounded-xl border border-gray-200 text-sm outline-none focus:border-indigo-500"
                 />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-gray-600 mb-1">Account Number</label>
-                  <input 
-                    type="text" 
-                    placeholder="Enter Account Number" 
-                    value={bankAcc} 
-                    onChange={e => setBankAcc(e.target.value)} 
-                    required 
+                  <input
+                    type="text"
+                    placeholder="Enter Account Number"
+                    value={bankAcc}
+                    onChange={e => setBankAcc(e.target.value)}
+                    required
                     className="w-full p-3 bg-white rounded-xl border border-gray-200 text-sm outline-none focus:border-indigo-500"
                   />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-gray-600 mb-1">IFSC Code</label>
-                  <input 
-                    type="text" 
-                    placeholder="e.g. SBIN0001234" 
-                    value={bankIfsc} 
-                    onChange={e => setBankIfsc(e.target.value)} 
-                    required 
+                  <input
+                    type="text"
+                    placeholder="e.g. SBIN0001234"
+                    value={bankIfsc}
+                    onChange={e => setBankIfsc(e.target.value)}
+                    required
                     className="w-full p-3 bg-white rounded-xl border border-gray-200 text-sm outline-none focus:border-indigo-500"
                   />
                 </div>
               </div>
-              <button 
-                type="submit" 
-                disabled={linking} 
+              <button
+                type="submit"
+                disabled={linking}
                 className="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 disabled:opacity-50 text-sm"
               >
                 {linking ? "Saving..." : "Link Bank Details"}
@@ -426,15 +426,15 @@ export default function App() {
     if (autocomplete !== null) {
       const place = autocomplete.getPlace();
       if (place.geometry && place.geometry.location) {
-         const lat = place.geometry.location.lat();
-         const lng = place.geometry.location.lng();
-         setJobData(prev => ({
-           ...prev, 
-           address: place.formatted_address || place.name || prev.address, 
-           latitude: lat, 
-           longitude: lng
-         }));
-         setMapCenter({ lat, lng });
+        const lat = place.geometry.location.lat();
+        const lng = place.geometry.location.lng();
+        setJobData(prev => ({
+          ...prev,
+          address: place.formatted_address || place.name || prev.address,
+          latitude: lat,
+          longitude: lng
+        }));
+        setMapCenter({ lat, lng });
       }
     }
   };
@@ -451,7 +451,7 @@ export default function App() {
   const [workerTab, setWorkerTab] = useState('jobs');
   const [showJobForm, setShowJobForm] = useState(false);
   const [activeJob, setActiveJob] = useState(null);
-  
+
   // Payment UI States
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [payingJob, setPayingJob] = useState(null);
@@ -759,7 +759,7 @@ export default function App() {
               }
             };
             const rzp = new window.Razorpay(options);
-            rzp.on('payment.failed', function (response){
+            rzp.on('payment.failed', function (response) {
               alert(`❌ Payment failed: ${response.error.description}`);
             });
             rzp.open();
@@ -910,43 +910,43 @@ export default function App() {
     e.preventDefault();
     if (!jobData.title || !jobData.description) return alert("Title and Description are required.");
     if (!jobData.is_negotiable && (!jobData.budget || isNaN(jobData.budget))) return alert("Please enter a valid budget or check Negotiable.");
-    
+
     // --- Ethical Scanning Mechanism ---
     const UNETHICAL_KEYWORDS = {
       "illegal hacking": [
-        "\\bdDoS\\b", "\\bhack into\\b", "\\bsteal data\\b", "\\bexploit vulnerability\\b", 
+        "\\bdDoS\\b", "\\bhack into\\b", "\\bsteal data\\b", "\\bexploit vulnerability\\b",
         "\\bsql injection\\b", "\\bmalware\\b", "\\bransomware\\b", "\\bphishing\\b"
       ],
       "academic dishonesty": [
-        "\\bdo my homework\\b", "\\bwrite my essay\\b", "\\btake my exam\\b", 
+        "\\bdo my homework\\b", "\\bwrite my essay\\b", "\\btake my exam\\b",
         "\\bdo my assignment\\b", "\\bcheat on\\b", "\\bthesis writing service\\b"
       ],
       "fraud/scams": [
-        "\\bponzi\\b", "\\bpyramid scheme\\b", "\\bmoney laundering\\b", 
+        "\\bponzi\\b", "\\bpyramid scheme\\b", "\\bmoney laundering\\b",
         "\\bfake id\\b", "\\bstolen credit card\\b", "\\bcarding\\b"
       ],
       "harassment": [
-        "\\bdox\\b", "\\bdoxxing\\b", "\\bcyberbully\\b", "\\btroll targeted\\b", 
+        "\\bdox\\b", "\\bdoxxing\\b", "\\bcyberbully\\b", "\\btroll targeted\\b",
         "\\bharass\\b", "\\bstalk\\b"
       ],
       "fake engagement/reviews": [
-        "\\bfake review\\b", "\\bbot followers\\b", "\\bbuy likes\\b", 
+        "\\bfake review\\b", "\\bbot followers\\b", "\\bbuy likes\\b",
         "\\bspam comments\\b", "\\bfake engagement\\b", "\\bmanipulate ratings\\b",
         "\\bfake reviews\\b"
       ],
       "counterfeit goods": [
-        "\\bfake designer\\b", "\\bcounterfeit\\b", "\\bknockoff\\b", 
+        "\\bfake designer\\b", "\\bcounterfeit\\b", "\\bknockoff\\b",
         "\\breplica watches\\b"
       ]
     };
-    
+
     const combinedText = `${jobData.title} ${jobData.description}`;
     for (const [category, keywords] of Object.entries(UNETHICAL_KEYWORDS)) {
       for (const pattern of keywords) {
         const regex = new RegExp(pattern, 'i');
         if (regex.test(combinedText)) {
           const displayKeyword = pattern.replace(/\\b/g, '');
-          alert(`[REJECTED] This bounty cannot be posted as it violates our ethical guidelines.\nReason: Triggered by keyword/phrase '${displayKeyword}' (Category: ${category}).`);
+          alert(`[REJECTED] This bounty cannot be posted as it violates our ethical guidelines.`);
           return;
         }
       }
@@ -963,7 +963,7 @@ export default function App() {
       setShowJobForm(false);
       setActiveTab('bookings');
       fetchClientJobs();
-    } catch (err) { 
+    } catch (err) {
       const errorMsg = err.response?.data ? JSON.stringify(err.response.data) : "Failed.";
       alert(`Job Post Failed: ${errorMsg}`);
     }
@@ -1053,7 +1053,7 @@ export default function App() {
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <button 
+            <button
               onClick={async () => {
                 const token = localStorage.getItem('access_token');
                 try {
@@ -1102,7 +1102,7 @@ export default function App() {
             <div className="flex justify-between items-end mb-8">
               <h2 className="text-3xl font-bold text-gray-800">{t.welcome}, {user?.username}</h2>
               {role === 'client' && (
-                <button 
+                <button
                   onClick={() => {
                     if (user?.verification_status !== 'verified') {
                       alert("Complete profile verification to post jobs.");
@@ -1110,7 +1110,7 @@ export default function App() {
                     } else {
                       setShowJobForm(true);
                     }
-                  }} 
+                  }}
                   className={`px-6 py-3 rounded-2xl font-bold shadow-lg transition ${user?.verification_status === 'verified' ? 'bg-red-600 text-white animate-pulse' : 'bg-gray-300 text-gray-600 cursor-not-allowed'}`}>
                   {t.postJob}
                 </button>
@@ -1235,11 +1235,10 @@ export default function App() {
                                     key={slot}
                                     type="button"
                                     onClick={() => setRequestFormData({ ...requestFormData, preferred_time_slot: slot })}
-                                    className={`py-2 px-1 text-[10px] font-bold rounded-lg border transition ${
-                                      requestFormData.preferred_time_slot === slot
+                                    className={`py-2 px-1 text-[10px] font-bold rounded-lg border transition ${requestFormData.preferred_time_slot === slot
                                         ? 'bg-indigo-600 text-white border-indigo-600 shadow'
                                         : 'bg-white text-gray-600 border-gray-200 hover:border-indigo-300'
-                                    }`}
+                                      }`}
                                   >
                                     {slot.split(' - ')[0]}
                                   </button>
@@ -1347,143 +1346,141 @@ export default function App() {
                       {clientJobs.length === 0 ? (
                         <div className="p-10 text-center bg-gray-50 rounded-2xl border-2 border-dashed">
                           <p className="text-gray-400">You haven't posted any jobs yet.</p>
-                      </div>
-                    ) : (
-                      clientJobs.map(job => (
-                        <div key={job.id} className={`p-6 bg-white border-l-4 shadow-sm rounded-xl flex justify-between items-center ${job.status === 'completed' ? 'border-green-500' :
+                        </div>
+                      ) : (
+                        clientJobs.map(job => (
+                          <div key={job.id} className={`p-6 bg-white border-l-4 shadow-sm rounded-xl flex justify-between items-center ${job.status === 'completed' ? 'border-green-500' :
                             job.status === 'accepted' ? 'border-blue-500' :
                               'border-yellow-500'
-                          }`}>
-                          <div>
-                            <h4 className="font-bold text-gray-800">{job.title}</h4>
-                            <div className="flex items-center gap-2 mt-1">
-                              <span className={`text-xs font-bold px-2 py-0.5 rounded uppercase ${job.status === 'completed' ? 'bg-green-100 text-green-700' :
+                            }`}>
+                            <div>
+                              <h4 className="font-bold text-gray-800">{job.title}</h4>
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className={`text-xs font-bold px-2 py-0.5 rounded uppercase ${job.status === 'completed' ? 'bg-green-100 text-green-700' :
                                   job.status === 'accepted' ? 'bg-blue-100 text-blue-700' :
                                     'bg-yellow-100 text-yellow-700'
-                                }`}>
-                                {job.status}
-                              </span>
-                              <span className="text-xs text-gray-500 font-bold">
-                                {Number(job.budget) === 0 ? "Negotiable" : `Budget: ₹${job.budget}`}
-                              </span>
+                                  }`}>
+                                  {job.status}
+                                </span>
+                                <span className="text-xs text-gray-500 font-bold">
+                                  {Number(job.budget) === 0 ? "Negotiable" : `Budget: ₹${job.budget}`}
+                                </span>
 
-                              {/* Escrow Status Badge */}
-                              {job.escrow_status === 'pending' && (
-                                <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-bold animate-pulse">⏳ Escrow Pending</span>
-                              )}
-                              {job.escrow_status === 'held' && (
-                                <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-bold">💸 Escrow Held</span>
-                              )}
-                              {job.escrow_status === 'released' && (
-                                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-bold">✅ Paid</span>
-                              )}
-                              {job.escrow_status === 'refunded' && (
-                                <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded font-bold">↩️ Refunded</span>
+                                {/* Escrow Status Badge */}
+                                {job.escrow_status === 'pending' && (
+                                  <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-bold animate-pulse">⏳ Escrow Pending</span>
+                                )}
+                                {job.escrow_status === 'held' && (
+                                  <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-bold">💸 Escrow Held</span>
+                                )}
+                                {job.escrow_status === 'released' && (
+                                  <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-bold">✅ Paid</span>
+                                )}
+                                {job.escrow_status === 'refunded' && (
+                                  <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded font-bold">↩️ Refunded</span>
+                                )}
+                              </div>
+
+                              {/* NEW: Worker Details Display */}
+                              {job.worker ? (
+                                <div className="mt-2 text-xs bg-gray-50 p-2 rounded border border-gray-200">
+                                  <p className="font-bold text-gray-700">Worker Assigned:</p>
+                                  <p className="text-gray-600">Name: {job.worker_username || job.worker}</p>
+                                  {/* Display Worker Phone only if escrow is held/paid */}
+                                  <p className="text-indigo-600 font-bold">
+                                    📞 {job.escrow_status === 'held' || job.escrow_status === 'released' ? (job.worker_phone || "No phone listed") : "Contact locked until escrow funded"}
+                                  </p>
+                                </div>
+                              ) : (
+                                <p className="text-xs text-gray-400 mt-1 italic">No worker assigned yet.</p>
                               )}
                             </div>
+                            <div className="flex gap-2 items-center">
+                              {job.status === 'accepted' && job.escrow_status === 'pending' && (
+                                <div className="flex flex-col gap-2">
+                                  <button onClick={() => { setPayingJob(job); setShowPaymentModal(true); }} className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow hover:bg-indigo-700 transition">💳 Fund Escrow</button>
+                                  <button onClick={() => handleRefundJob(job.id)} className="bg-red-50 text-red-600 border border-red-200 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-red-100 transition">Cancel Job</button>
+                                </div>
+                              )}
 
-                            {/* NEW: Worker Details Display */}
-                            {job.worker ? (
-                              <div className="mt-2 text-xs bg-gray-50 p-2 rounded border border-gray-200">
-                                <p className="font-bold text-gray-700">Worker Assigned:</p>
-                                <p className="text-gray-600">Name: {job.worker_username || job.worker}</p>
-                                {/* Display Worker Phone only if escrow is held/paid */}
-                                <p className="text-indigo-600 font-bold">
-                                  📞 {job.escrow_status === 'held' || job.escrow_status === 'released' ? (job.worker_phone || "No phone listed") : "Contact locked until escrow funded"}
-                                </p>
-                              </div>
-                            ) : (
-                              <p className="text-xs text-gray-400 mt-1 italic">No worker assigned yet.</p>
-                            )}
+                              {(job.status === 'accepted' || job.status === 'worker_completed' || job.status === 'disputed') && job.escrow_status === 'held' && (
+                                <div className="flex flex-col gap-2">
+                                  {job.status === 'disputed' ? (
+                                    <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-xs font-bold mb-1 shadow-sm">
+                                      🚨 Job is in dispute. Funds frozen pending admin review.
+                                    </div>
+                                  ) : job.status === 'worker_completed' ? (
+                                    <div className="bg-blue-50 border border-blue-200 text-blue-700 px-3 py-2 rounded-lg text-xs font-bold mb-1 shadow-sm">
+                                      Worker marked this job as completed. Please approve or dispute.
+                                    </div>
+                                  ) : null}
+
+                                  {job.status !== 'disputed' && (
+                                    <button onClick={() => handleCompleteJob(job.id)} className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow hover:bg-green-700 transition">✓ Approve & Release Payment</button>
+                                  )}
+
+                                  {job.status === 'worker_completed' && (
+                                    <button onClick={() => handleDisputeJob(job.id)} className="bg-red-50 text-red-600 border border-red-200 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-red-100 transition">🚨 Report Issue / Dispute</button>
+                                  )}
+
+                                  {job.status === 'accepted' && (
+                                    <button onClick={() => handleRefundJob(job.id)} className="bg-red-50 text-red-600 border border-red-200 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-red-100 transition">Cancel & Refund</button>
+                                  )}
+                                </div>
+                              )}
+
+                              {(job.status === 'completed' || (job.status === 'accepted' && job.escrow_status === 'released')) && (
+                                <button onClick={() => { setSelectedJobId(job.id); setShowReviewForm(true); }} className="bg-yellow-400 text-yellow-900 px-4 py-2 rounded-lg text-sm font-bold shadow hover:bg-yellow-500 transition">★ {t.rateWorker}</button>
+                              )}
+
+                              {job.status === 'pending' && (
+                                <span className="text-xs font-bold text-gray-400 italic">{t.waiting}</span>
+                              )}
+                            </div>
                           </div>
-                          <div className="flex gap-2 items-center">
-                            {job.status === 'accepted' && job.escrow_status === 'pending' && (
-                              <div className="flex flex-col gap-2">
-                                <button onClick={() => { setPayingJob(job); setShowPaymentModal(true); }} className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow hover:bg-indigo-700 transition">💳 Fund Escrow</button>
-                                <button onClick={() => handleRefundJob(job.id)} className="bg-red-50 text-red-600 border border-red-200 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-red-100 transition">Cancel Job</button>
-                              </div>
-                            )}
+                        ))
+                      )}
+                    </div>
 
-                            {(job.status === 'accepted' || job.status === 'worker_completed' || job.status === 'disputed') && job.escrow_status === 'held' && (
-                              <div className="flex flex-col gap-2">
-                                {job.status === 'disputed' ? (
-                                  <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-xs font-bold mb-1 shadow-sm">
-                                    🚨 Job is in dispute. Funds frozen pending admin review.
+                    {/* Service Requests Section within Bookings */}
+                    {serviceRequests.length > 0 && (
+                      <div className="mt-8">
+                        <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                          <span>📋</span> {t.myRequests}
+                        </h3>
+                        <div className="space-y-3">
+                          {serviceRequests.map(req => (
+                            <div key={req.id} className={`p-5 bg-white border-l-4 shadow-sm rounded-xl ${req.status === 'completed' ? 'border-green-500' :
+                                req.status === 'accepted' || req.status === 'scheduled' ? 'border-blue-500' :
+                                  req.status === 'rejected' ? 'border-red-500' :
+                                    'border-yellow-500'
+                              }`}>
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <h4 className="font-bold text-gray-800">{req.worker_display_name}</h4>
+                                  <p className="text-xs text-gray-500 mt-0.5">{req.trade_category}</p>
+                                  <p className="text-sm text-gray-600 mt-1">{req.description}</p>
+                                  <div className="flex items-center gap-2 mt-2">
+                                    <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded font-bold">📅 {req.preferred_date}</span>
+                                    <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded font-bold">🕐 {req.preferred_time_slot}</span>
                                   </div>
-                                ) : job.status === 'worker_completed' ? (
-                                  <div className="bg-blue-50 border border-blue-200 text-blue-700 px-3 py-2 rounded-lg text-xs font-bold mb-1 shadow-sm">
-                                    Worker marked this job as completed. Please approve or dispute.
-                                  </div>
-                                ) : null}
-                                
-                                {job.status !== 'disputed' && (
-                                  <button onClick={() => handleCompleteJob(job.id)} className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow hover:bg-green-700 transition">✓ Approve & Release Payment</button>
-                                )}
-
-                                {job.status === 'worker_completed' && (
-                                  <button onClick={() => handleDisputeJob(job.id)} className="bg-red-50 text-red-600 border border-red-200 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-red-100 transition">🚨 Report Issue / Dispute</button>
-                                )}
-
-                                {job.status === 'accepted' && (
-                                  <button onClick={() => handleRefundJob(job.id)} className="bg-red-50 text-red-600 border border-red-200 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-red-100 transition">Cancel & Refund</button>
-                                )}
+                                  {req.worker_notes && (
+                                    <p className="text-xs text-indigo-600 mt-2 italic">Worker notes: {req.worker_notes}</p>
+                                  )}
+                                </div>
+                                <span className={`text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider ${req.status === 'completed' ? 'bg-green-100 text-green-700' :
+                                    req.status === 'accepted' ? 'bg-blue-100 text-blue-700' :
+                                      req.status === 'scheduled' ? 'bg-purple-100 text-purple-700' :
+                                        req.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                                          'bg-yellow-100 text-yellow-700'
+                                  }`}>{req.status}</span>
                               </div>
-                            )}
-
-                            {(job.status === 'completed' || (job.status === 'accepted' && job.escrow_status === 'released')) && (
-                              <button onClick={() => { setSelectedJobId(job.id); setShowReviewForm(true); }} className="bg-yellow-400 text-yellow-900 px-4 py-2 rounded-lg text-sm font-bold shadow hover:bg-yellow-500 transition">★ {t.rateWorker}</button>
-                            )}
-
-                            {job.status === 'pending' && (
-                              <span className="text-xs font-bold text-gray-400 italic">{t.waiting}</span>
-                            )}
-                          </div>
+                            </div>
+                          ))}
                         </div>
-                      ))
+                      </div>
                     )}
                   </div>
-
-                  {/* Service Requests Section within Bookings */}
-                  {serviceRequests.length > 0 && (
-                    <div className="mt-8">
-                      <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                        <span>📋</span> {t.myRequests}
-                      </h3>
-                      <div className="space-y-3">
-                        {serviceRequests.map(req => (
-                          <div key={req.id} className={`p-5 bg-white border-l-4 shadow-sm rounded-xl ${
-                            req.status === 'completed' ? 'border-green-500' :
-                            req.status === 'accepted' || req.status === 'scheduled' ? 'border-blue-500' :
-                            req.status === 'rejected' ? 'border-red-500' :
-                            'border-yellow-500'
-                          }`}>
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <h4 className="font-bold text-gray-800">{req.worker_display_name}</h4>
-                                <p className="text-xs text-gray-500 mt-0.5">{req.trade_category}</p>
-                                <p className="text-sm text-gray-600 mt-1">{req.description}</p>
-                                <div className="flex items-center gap-2 mt-2">
-                                  <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded font-bold">📅 {req.preferred_date}</span>
-                                  <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded font-bold">🕐 {req.preferred_time_slot}</span>
-                                </div>
-                                {req.worker_notes && (
-                                  <p className="text-xs text-indigo-600 mt-2 italic">Worker notes: {req.worker_notes}</p>
-                                )}
-                              </div>
-                              <span className={`text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider ${
-                                req.status === 'completed' ? 'bg-green-100 text-green-700' :
-                                req.status === 'accepted' ? 'bg-blue-100 text-blue-700' :
-                                req.status === 'scheduled' ? 'bg-purple-100 text-purple-700' :
-                                req.status === 'rejected' ? 'bg-red-100 text-red-700' :
-                                'bg-yellow-100 text-yellow-700'
-                              }`}>{req.status}</span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
                 )}
                 {activeTab === 'profile' && <WorkerProfile lang={lang} user={user} setUser={setUser} fetchCurrentUser={fetchCurrentUser} />}
                 {activeTab === 'reviews' && (
@@ -1550,7 +1547,7 @@ export default function App() {
                           </p>
                           {/* ... buttons ... */}
                         </div>
-                          <button 
+                          <button
                             onClick={() => {
                               if (user?.verification_status !== 'verified') {
                                 alert("Complete profile verification to accept jobs.");
@@ -1558,7 +1555,7 @@ export default function App() {
                               } else {
                                 handleAcceptJob(job.id);
                               }
-                            }} 
+                            }}
                             className={`mt-2 px-5 py-2 rounded-xl text-sm font-bold shadow-md ${user?.verification_status === 'verified' ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-gray-300 text-gray-600 cursor-not-allowed'}`}
                           >
                             {t.accept}
@@ -1578,10 +1575,9 @@ export default function App() {
                         <p className="text-gray-400 italic">You have no active jobs right now.</p>
                       </div>
                     ) : (
-                      <div className={`border-2 p-8 rounded-[2rem] shadow-lg ${
-                        activeJob.escrow_status === 'pending' ? 'bg-amber-50/50 border-amber-200' : 'bg-green-50 border-2 border-green-200'
-                      }`}>
-                        
+                      <div className={`border-2 p-8 rounded-[2rem] shadow-lg ${activeJob.escrow_status === 'pending' ? 'bg-amber-50/50 border-amber-200' : 'bg-green-50 border-2 border-green-200'
+                        }`}>
+
                         {/* Escrow Status Banners */}
                         {activeJob.escrow_status === 'pending' ? (
                           <div className="bg-amber-50 border border-amber-200 p-6 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-4 mb-6 shadow-sm">
@@ -1632,16 +1628,14 @@ export default function App() {
 
                         <div className="flex justify-between items-start">
                           <div>
-                            <span className={`text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider ${
-                              activeJob.escrow_status === 'pending' ? 'bg-amber-200 text-amber-800' : 'bg-green-200 text-green-800'
-                            }`}>{activeJob.escrow_status === 'pending' ? 'Awaiting Payment' : 'Active Now'}</span>
+                            <span className={`text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider ${activeJob.escrow_status === 'pending' ? 'bg-amber-200 text-amber-800' : 'bg-green-200 text-green-800'
+                              }`}>{activeJob.escrow_status === 'pending' ? 'Awaiting Payment' : 'Active Now'}</span>
                             <h3 className="text-3xl font-bold text-gray-800 mt-3">{activeJob.title}</h3>
                             <p className="text-gray-600 mt-1">{activeJob.description}</p>
                           </div>
                           <div className="text-right">
-                            <p className={`text-4xl font-black ${
-                              activeJob.escrow_status === 'pending' ? 'text-amber-600' : 'text-green-600'
-                            }`}>
+                            <p className={`text-4xl font-black ${activeJob.escrow_status === 'pending' ? 'text-amber-600' : 'text-green-600'
+                              }`}>
                               {Number(activeJob.budget) === 0 ? "Negotiable" : `₹${activeJob.budget}`}
                             </p>
                           </div>
@@ -1663,7 +1657,7 @@ export default function App() {
                                 allowFullScreen
                                 className={activeJob.escrow_status === 'pending' ? 'blur-md pointer-events-none' : ''}
                               ></iframe>
-                              
+
                               {activeJob.escrow_status === 'pending' && (
                                 <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm flex flex-col justify-center items-center text-center p-4">
                                   <span className="text-2xl">🔒</span>
@@ -1691,7 +1685,7 @@ export default function App() {
                           <div>
                             <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Client Details</h4>
                             <p className="text-lg font-medium text-gray-800">👤 {activeJob.client_username}</p>
-                            
+
                             {activeJob.escrow_status === 'pending' ? (
                               <p className="text-xs font-bold text-red-500 mt-2">📞 Contact hidden until client makes payment</p>
                             ) : (
@@ -1937,24 +1931,22 @@ export default function App() {
                       </div>
                     ) : (
                       serviceRequests.map(req => (
-                        <div key={req.id} className={`p-6 bg-white border-l-4 shadow-sm rounded-xl ${
-                          req.status === 'completed' ? 'border-green-500' :
-                          req.status === 'accepted' || req.status === 'scheduled' ? 'border-blue-500' :
-                          req.status === 'rejected' ? 'border-red-500' :
-                          'border-yellow-500'
-                        }`}>
+                        <div key={req.id} className={`p-6 bg-white border-l-4 shadow-sm rounded-xl ${req.status === 'completed' ? 'border-green-500' :
+                            req.status === 'accepted' || req.status === 'scheduled' ? 'border-blue-500' :
+                              req.status === 'rejected' ? 'border-red-500' :
+                                'border-yellow-500'
+                          }`}>
                           <div className="flex justify-between items-start mb-3">
                             <div>
                               <h4 className="font-bold text-gray-800">From: {req.client_username}</h4>
                               <p className="text-xs text-gray-500 mt-0.5">{req.trade_category}</p>
                             </div>
-                            <span className={`text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider ${
-                              req.status === 'completed' ? 'bg-green-100 text-green-700' :
-                              req.status === 'accepted' ? 'bg-blue-100 text-blue-700' :
-                              req.status === 'scheduled' ? 'bg-purple-100 text-purple-700' :
-                              req.status === 'rejected' ? 'bg-red-100 text-red-700' :
-                              'bg-yellow-100 text-yellow-700'
-                            }`}>{req.status}</span>
+                            <span className={`text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider ${req.status === 'completed' ? 'bg-green-100 text-green-700' :
+                                req.status === 'accepted' ? 'bg-blue-100 text-blue-700' :
+                                  req.status === 'scheduled' ? 'bg-purple-100 text-purple-700' :
+                                    req.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                                      'bg-yellow-100 text-yellow-700'
+                              }`}>{req.status}</span>
                           </div>
                           <p className="text-sm text-gray-600">{req.description}</p>
                           <div className="flex items-center gap-2 mt-3">
@@ -2057,7 +2049,7 @@ export default function App() {
             <div className="bg-white w-full max-w-md rounded-[2rem] p-8 shadow-2xl">
               <h3 className="text-xl font-bold mb-2 text-gray-800">Secure Escrow Payment</h3>
               <p className="text-gray-500 text-sm mb-6">Fund the budget of <span className="font-extrabold text-indigo-600">₹{payingJob.budget}</span> for your job "<span className="font-semibold text-gray-700">{payingJob.title}</span>". Money is held securely by the platform.</p>
-              
+
               <div className="space-y-4 mb-6">
                 <button
                   type="button"
@@ -2068,7 +2060,7 @@ export default function App() {
                   <span className="text-lg">⚡</span>
                   {paymentProcessing ? "Processing..." : "Simulate Instant Payment"}
                 </button>
-                
+
                 <button
                   type="button"
                   disabled={paymentProcessing}
@@ -2079,7 +2071,7 @@ export default function App() {
                   {paymentProcessing ? "Opening Razorpay..." : "Pay securely with Razorpay"}
                 </button>
               </div>
-              
+
               <button
                 type="button"
                 disabled={paymentProcessing}
@@ -2101,12 +2093,12 @@ export default function App() {
                   <label className="block text-sm font-bold text-gray-500 uppercase tracking-widest mb-2">Bounty Title</label>
                   <input placeholder="e.g., Fix plumbing issue, Move furniture, etc." className="w-full p-4 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition" onChange={(e) => setJobData({ ...jobData, title: e.target.value })} required />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-bold text-gray-500 uppercase tracking-widest mb-2">Detailed Task Description</label>
                   <textarea placeholder="Describe what exactly needs to be done..." className="w-full p-4 bg-gray-50 rounded-2xl h-32 outline-none focus:ring-2 focus:ring-indigo-500 transition resize-none" onChange={(e) => setJobData({ ...jobData, description: e.target.value })} required />
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Price Input & Toggle */}
                   <div className="bg-indigo-50 p-5 rounded-2xl border border-indigo-100">
@@ -2121,7 +2113,7 @@ export default function App() {
                         <span className="ml-2 text-xs font-bold text-indigo-700">Negotiable</span>
                       </label>
                     </div>
-                    
+
                     <div className="relative">
                       <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₹</span>
                       <input
@@ -2140,16 +2132,16 @@ export default function App() {
                   <div className="bg-orange-50 p-5 rounded-2xl border border-orange-100">
                     <label className="block text-sm font-bold text-orange-900 uppercase tracking-widest mb-4">Urgency Level</label>
                     <div className="flex gap-2 bg-white p-1 rounded-xl shadow-inner">
-                      <button 
-                        type="button" 
+                      <button
+                        type="button"
                         onClick={() => setJobData({ ...jobData, urgency_level: 'Standard' })}
                         className={`flex-1 py-3 text-sm font-bold rounded-lg transition ${jobData.urgency_level === 'Standard' ? 'bg-orange-100 text-orange-800 shadow' : 'text-gray-500 hover:bg-gray-50'}`}
                       >
                         Standard
                       </button>
-                      <button 
+                      <button
                         type="button"
-                        onClick={() => setJobData({ ...jobData, urgency_level: 'Emergency' })} 
+                        onClick={() => setJobData({ ...jobData, urgency_level: 'Emergency' })}
                         className={`flex-1 py-3 text-sm font-bold rounded-lg transition ${jobData.urgency_level === 'Emergency' ? 'bg-red-500 text-white shadow' : 'text-gray-500 hover:bg-gray-50'}`}
                       >
                         🚨 Emergency
@@ -2161,13 +2153,13 @@ export default function App() {
                   {isLoaded ? (
                     <div className="space-y-3">
                       <Autocomplete onLoad={onLoadAutocomplete} onPlaceChanged={onPlaceChanged}>
-                        <input 
-                          type="text" 
-                          placeholder="Search Job Location..." 
-                          value={jobData.address} 
-                          onChange={e => setJobData({...jobData, address: e.target.value})} 
+                        <input
+                          type="text"
+                          placeholder="Search Job Location..."
+                          value={jobData.address}
+                          onChange={e => setJobData({ ...jobData, address: e.target.value })}
                           className="w-full p-3 border rounded-xl outline-none focus:border-indigo-500 transition"
-                          onKeyDown={(e) => { e.key === 'Enter' && e.preventDefault(); }} 
+                          onKeyDown={(e) => { e.key === 'Enter' && e.preventDefault(); }}
                         />
                       </Autocomplete>
                       <div className="h-56 w-full rounded-xl overflow-hidden border border-gray-200">
@@ -2178,7 +2170,7 @@ export default function App() {
                           onClick={(e) => {
                             const lat = e.latLng.lat();
                             const lng = e.latLng.lng();
-                            setJobData(prev => ({...prev, latitude: lat, longitude: lng}));
+                            setJobData(prev => ({ ...prev, latitude: lat, longitude: lng }));
                             setMapCenter({ lat, lng });
                           }}
                         >
@@ -2204,7 +2196,7 @@ export default function App() {
             <div className="bg-white w-full max-w-md rounded-[2rem] p-8 shadow-2xl border border-gray-100">
               <h3 className="text-2xl font-black mb-6 text-gray-800 text-center">{t.submitReview}</h3>
               <form onSubmit={handleSubmitReview} className="space-y-6">
-                
+
                 <div className="flex flex-col items-center">
                   <label className="block text-sm font-bold text-gray-500 uppercase tracking-widest mb-3">{t.rating}</label>
                   <div className="flex gap-2">
@@ -2226,14 +2218,14 @@ export default function App() {
 
                 <div>
                   <label className="block text-sm font-bold text-gray-500 uppercase tracking-widest mb-2">{t.comment}</label>
-                  <textarea 
-                    className="w-full p-4 border border-gray-200 bg-gray-50 rounded-2xl h-32 focus:ring-2 focus:ring-indigo-500 focus:bg-white transition outline-none resize-none" 
-                    placeholder="Share your experience working with them..." 
+                  <textarea
+                    className="w-full p-4 border border-gray-200 bg-gray-50 rounded-2xl h-32 focus:ring-2 focus:ring-indigo-500 focus:bg-white transition outline-none resize-none"
+                    placeholder="Share your experience working with them..."
                     value={reviewData.comment}
-                    onChange={(e) => setReviewData({ ...reviewData, comment: e.target.value })} 
+                    onChange={(e) => setReviewData({ ...reviewData, comment: e.target.value })}
                   />
                 </div>
-                
+
                 <div className="flex gap-3 pt-2">
                   <button type="submit" className="flex-1 bg-indigo-600 text-white py-4 rounded-2xl font-black shadow-lg hover:bg-indigo-700 hover:shadow-xl transition transform hover:-translate-y-0.5">Submit</button>
                   <button type="button" onClick={() => setShowReviewForm(false)} className="flex-1 bg-gray-100 text-gray-600 py-4 rounded-2xl font-bold hover:bg-gray-200 transition">Cancel</button>
