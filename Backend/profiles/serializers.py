@@ -47,9 +47,15 @@ class ServiceRequestSerializer(serializers.ModelSerializer):
             'id', 'client', 'client_username', 'worker', 'worker_username',
             'trade_profile', 'trade_category', 'worker_display_name',
             'description', 'preferred_date', 'preferred_time_slot',
-            'status', 'worker_notes', 'created_at'
+            'status', 'worker_notes', 'created_at',
+            'budget', 'escrow_status', 'payment_method', 'razorpay_order_id', 
+            'razorpay_payment_id', 'razorpay_signature', 'paid_at', 'released_at'
         ]
-        read_only_fields = ['client', 'worker', 'status', 'created_at']
+        read_only_fields = [
+            'client', 'worker', 'status', 'created_at', 'escrow_status', 
+            'payment_method', 'razorpay_order_id', 'razorpay_payment_id', 
+            'razorpay_signature', 'paid_at', 'released_at'
+        ]
 
 class WorkerProfileSerializer(serializers.ModelSerializer):
     username = serializers.ReadOnlyField(source='user.username')

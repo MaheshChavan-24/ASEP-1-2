@@ -456,6 +456,7 @@ export default function App() {
   // Payment UI States
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [payingJob, setPayingJob] = useState(null);
+  const [paymentType, setPaymentType] = useState('job'); // 'job' or 'service'
   const [paymentProcessing, setPaymentProcessing] = useState(false);
 
   // Review UI States
@@ -471,7 +472,7 @@ export default function App() {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedTradeProfile, setSelectedTradeProfile] = useState(null);
   const [showRequestModal, setShowRequestModal] = useState(false);
-  const [requestFormData, setRequestFormData] = useState({ description: '', preferred_date: '', preferred_time_slot: '09:00 AM - 10:00 AM' });
+  const [requestFormData, setRequestFormData] = useState({ description: '', preferred_date: '', preferred_time_slot: '09:00 AM - 10:00 AM', budget: '' });
   const [serviceRequests, setServiceRequests] = useState([]);
   const [workerTradeProfiles, setWorkerTradeProfiles] = useState([]);
   const [showTradeProfileForm, setShowTradeProfileForm] = useState(false);
@@ -684,11 +685,12 @@ export default function App() {
         trade_profile: selectedTradeProfile.id,
         description: requestFormData.description,
         preferred_date: requestFormData.preferred_date,
-        preferred_time_slot: requestFormData.preferred_time_slot
+        preferred_time_slot: requestFormData.preferred_time_slot,
+        budget: requestFormData.budget
       }, { headers: { Authorization: `Bearer ${token}` } });
       alert("Service request sent successfully!");
       setShowRequestModal(false);
-      setRequestFormData({ description: '', preferred_date: '', preferred_time_slot: '09:00 AM - 10:00 AM' });
+      setRequestFormData({ description: '', preferred_date: '', preferred_time_slot: '09:00 AM - 10:00 AM', budget: '' });
       fetchServiceRequests();
     } catch (err) {
       alert(err.response?.data?.error || "Failed to send request.");
@@ -739,8 +741,9 @@ export default function App() {
   const handlePayJob = async (jobId, method) => {
     setPaymentProcessing(true);
     const token = localStorage.getItem('access_token');
+    const apiEndpoint = paymentType === 'job' ? `${JOB_API}${jobId}` : `${PROFILE_API}service-requests/${jobId}`;
     try {
-      const res = await axios.post(`${JOB_API}${jobId}/pay/`, { method }, {
+      const res = await axios.post(`${apiEndpoint}/pay/`, { method }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (method === 'razorpay') {
@@ -759,7 +762,7 @@ export default function App() {
               handler: async function (response) {
                 // Verify payment on backend
                 try {
-                  await axios.post(`${JOB_API}${jobId}/verify-payment/`, {
+                  await axios.post(`${apiEndpoint}/verify-payment/`, {
                     razorpay_payment_id: response.razorpay_payment_id,
                     razorpay_order_id: response.razorpay_order_id,
                     razorpay_signature: response.razorpay_signature
@@ -767,6 +770,7 @@ export default function App() {
                   alert(`🎉 Payment successful! Escrow is secured.`);
                   setShowPaymentModal(false);
                   fetchClientJobs();
+                  fetchServiceRequests();
                   fetchCurrentUser();
                 } catch (verifyErr) {
                   alert("Payment verification failed: " + (verifyErr.response?.data?.error || "Unknown Error"));
@@ -801,6 +805,7 @@ export default function App() {
         alert("Payment simulated successfully! Escrow funded.");
         setShowPaymentModal(false);
         fetchClientJobs();
+        fetchServiceRequests();
         fetchCurrentUser();
         setPaymentProcessing(false);
       }
@@ -832,6 +837,48 @@ export default function App() {
     }
   };
 
+  const handleRefundServiceRequest = async (reqId) => {
+    if (!window.confirm("Are you sure you want to cancel this request and release/refund escrow?")) return;
+    const token = localStorage.getItem('access_token');
+    try {
+      const res = await axios.post(`${PROFILE_API}service-requests/${reqId}/refund/`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      alert(res.data.message || "Request cancelled successfully.");
+      fetchServiceRequests();
+      fetchCurrentUser();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to process cancellation: " + (err.response?.data?.error || "Error"));
+    }
+  };
+
+  const handleWorkerCompleteServiceRequest = async (reqId) => {
+    const token = localStorage.getItem('access_token');
+    try {
+      await axios.post(`${PROFILE_API}service-requests/${reqId}/worker-complete/`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      alert("Request marked as completed!");
+      fetchServiceRequests();
+    } catch (err) {
+      alert("Failed to mark completed: " + (err.response?.data?.error || "Error"));
+    }
+  };
+
+  const handleCompleteServiceRequest = async (reqId) => {
+    const token = localStorage.getItem('access_token');
+    try {
+      const res = await axios.post(`${PROFILE_API}service-requests/${reqId}/release-funds/`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      alert(res.data.message || "Escrow released successfully!");
+      fetchServiceRequests();
+      fetchCurrentUser();
+    } catch (err) {
+      alert("Failed to release escrow: " + (err.response?.data?.error || "Error"));
+    }
+  };
 
 
   useEffect(() => {
@@ -1251,6 +1298,18 @@ export default function App() {
                               />
                             </div>
                             <div>
+                              <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Offer Price (₹)</label>
+                              <input
+                                type="number"
+                                placeholder="E.g. 500"
+                                className="w-full p-3 bg-gray-50 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 border border-gray-200"
+                                value={requestFormData.budget}
+                                onChange={(e) => setRequestFormData({ ...requestFormData, budget: e.target.value })}
+                                required
+                                min="1"
+                              />
+                            </div>
+                            <div>
                               <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Time Slot</label>
                               <div className="grid grid-cols-3 gap-2">
                                 {timeSlots.map(slot => (
@@ -1490,13 +1549,51 @@ export default function App() {
                                   {req.worker_notes && (
                                     <p className="text-xs text-indigo-600 mt-2 italic">Worker notes: {req.worker_notes}</p>
                                   )}
+                                  <div className="mt-3 flex items-center gap-2 flex-wrap">
+                                    <span className="text-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">
+                                      💰 ₹{req.budget}
+                                    </span>
+                                    {req.escrow_status === 'pending' && (
+                                      <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-bold animate-pulse">⏳ Escrow Pending</span>
+                                    )}
+                                    {req.escrow_status === 'held' && (
+                                      <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-bold">💸 Escrow Held</span>
+                                    )}
+                                    {req.escrow_status === 'released' && (
+                                      <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-bold">✅ Paid</span>
+                                    )}
+                                    {req.escrow_status === 'refunded' && (
+                                      <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded font-bold">↩️ Refunded</span>
+                                    )}
+                                  </div>
                                 </div>
-                                <span className={`text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider ${req.status === 'completed' ? 'bg-green-100 text-green-700' :
-                                  req.status === 'accepted' ? 'bg-blue-100 text-blue-700' :
-                                    req.status === 'scheduled' ? 'bg-purple-100 text-purple-700' :
-                                      req.status === 'rejected' ? 'bg-red-100 text-red-700' :
-                                        'bg-yellow-100 text-yellow-700'
-                                  }`}>{req.status}</span>
+                                <div className="flex flex-col items-end gap-2">
+                                  <span className={`text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider ${req.status === 'completed' ? 'bg-green-100 text-green-700' :
+                                    req.status === 'accepted' ? 'bg-blue-100 text-blue-700' :
+                                      req.status === 'scheduled' ? 'bg-purple-100 text-purple-700' :
+                                        req.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                                          req.status === 'worker_completed' ? 'bg-blue-100 text-blue-700' :
+                                            'bg-yellow-100 text-yellow-700'
+                                    }`}>{req.status}</span>
+                                    
+                                  {req.status === 'accepted' && req.escrow_status === 'pending' && (
+                                    <div className="flex flex-col gap-2 mt-2">
+                                      <button onClick={() => { setPaymentType('service'); setPayingJob(req); setShowPaymentModal(true); }} className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow hover:bg-indigo-700 transition">💳 Fund Escrow</button>
+                                      <button onClick={() => handleRefundServiceRequest(req.id)} className="bg-red-50 text-red-600 border border-red-200 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-red-100 transition">Cancel Request</button>
+                                    </div>
+                                  )}
+                                  
+                                  {(req.status === 'accepted' || req.status === 'worker_completed' || req.status === 'disputed') && req.escrow_status === 'held' && (
+                                    <div className="flex flex-col gap-2 mt-2 items-end">
+                                      {req.status === 'worker_completed' && (
+                                        <div className="bg-blue-50 border border-blue-200 text-blue-700 px-3 py-2 rounded-lg text-xs font-bold mb-1 shadow-sm text-right max-w-[200px]">
+                                          Worker marked this as completed. Please approve.
+                                        </div>
+                                      )}
+                                      <button onClick={() => handleCompleteServiceRequest(req.id)} className="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow hover:bg-green-700 transition">✓ Approve & Release</button>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           ))}
@@ -1971,17 +2068,26 @@ export default function App() {
                               <h4 className="font-bold text-gray-800">From: {req.client_username}</h4>
                               <p className="text-xs text-gray-500 mt-0.5">{req.trade_category}</p>
                             </div>
-                            <span className={`text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider ${req.status === 'completed' ? 'bg-green-100 text-green-700' :
-                              req.status === 'accepted' ? 'bg-blue-100 text-blue-700' :
-                                req.status === 'scheduled' ? 'bg-purple-100 text-purple-700' :
-                                  req.status === 'rejected' ? 'bg-red-100 text-red-700' :
-                                    'bg-yellow-100 text-yellow-700'
-                              }`}>{req.status}</span>
+                            <div className="flex flex-col items-end gap-1">
+                              <span className={`text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider ${req.status === 'completed' ? 'bg-green-100 text-green-700' :
+                                req.status === 'accepted' ? 'bg-blue-100 text-blue-700' :
+                                  req.status === 'scheduled' ? 'bg-purple-100 text-purple-700' :
+                                    req.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                                      req.status === 'worker_completed' ? 'bg-blue-100 text-blue-700' :
+                                        'bg-yellow-100 text-yellow-700'
+                                }`}>{req.status}</span>
+                              <div className="flex gap-1 mt-1">
+                                {req.escrow_status === 'pending' && <span className="text-[9px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-bold animate-pulse">Escrow Pending</span>}
+                                {req.escrow_status === 'held' && <span className="text-[9px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-bold">Escrow Held</span>}
+                                {req.escrow_status === 'released' && <span className="text-[9px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-bold">Paid</span>}
+                              </div>
+                            </div>
                           </div>
                           <p className="text-sm text-gray-600">{req.description}</p>
                           <div className="flex items-center gap-2 mt-3">
                             <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded font-bold">📅 {req.preferred_date}</span>
                             <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded font-bold">🕐 {req.preferred_time_slot}</span>
+                            <span className="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded font-bold">💰 ₹{req.budget}</span>
                           </div>
 
                           {/* Action Buttons */}
@@ -2004,30 +2110,30 @@ export default function App() {
                               </button>
                             </div>
                           )}
-                          {req.status === 'accepted' && (
-                            <div className="flex gap-2 mt-4">
-                              <button
-                                onClick={() => handleUpdateServiceRequest(req.id, 'scheduled')}
-                                className="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow hover:bg-purple-700 transition"
-                              >
-                                📆 Confirm Schedule
-                              </button>
-                              <button
-                                onClick={() => handleUpdateServiceRequest(req.id, 'completed')}
-                                className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow hover:bg-green-700 transition"
-                              >
-                                ✅ Mark Complete
-                              </button>
-                            </div>
-                          )}
-                          {req.status === 'scheduled' && (
-                            <div className="flex gap-2 mt-4">
-                              <button
-                                onClick={() => handleUpdateServiceRequest(req.id, 'completed')}
-                                className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow hover:bg-green-700 transition"
-                              >
-                                ✅ Mark Complete
-                              </button>
+                          {(req.status === 'accepted' || req.status === 'scheduled') && (
+                            <div className="flex gap-2 mt-4 flex-col">
+                              <div className="flex gap-2">
+                                {req.status === 'accepted' && (
+                                  <button
+                                    onClick={() => handleUpdateServiceRequest(req.id, 'scheduled')}
+                                    className="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow hover:bg-purple-700 transition"
+                                  >
+                                    📆 Confirm Schedule
+                                  </button>
+                                )}
+                                {req.escrow_status === 'held' ? (
+                                  <button
+                                    onClick={() => handleWorkerCompleteServiceRequest(req.id)}
+                                    className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow hover:bg-green-700 transition"
+                                  >
+                                    ✅ Mark Complete
+                                  </button>
+                                ) : (
+                                  <div className="text-xs bg-yellow-50 text-yellow-700 border border-yellow-200 p-2 rounded-lg">
+                                    ⏳ Waiting for client to fund escrow before you can mark complete.
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           )}
                         </div>

@@ -71,6 +71,8 @@ class ServiceRequest(models.Model):
         ('pending', 'Pending'),
         ('accepted', 'Accepted'),
         ('scheduled', 'Scheduled'),
+        ('worker_completed', 'Worker Completed'),
+        ('disputed', 'Disputed'),
         ('completed', 'Completed'),
         ('rejected', 'Rejected'),
     )
@@ -95,6 +97,24 @@ class ServiceRequest(models.Model):
     preferred_time_slot = models.CharField(max_length=30, choices=TIME_SLOT_CHOICES)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     worker_notes = models.TextField(blank=True, default='', help_text="Counter-proposal or notes from worker")
+    
+    budget = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    
+    ESCROW_STATUS_CHOICES = (
+        ('none', 'None'),
+        ('pending', 'Pending Payment'),
+        ('held', 'Funds Held'),
+        ('released', 'Funds Released'),
+        ('refunded', 'Refunded'),
+    )
+    escrow_status = models.CharField(max_length=20, choices=ESCROW_STATUS_CHOICES, default='none')
+    payment_method = models.CharField(max_length=20, default='simulated')
+    razorpay_order_id = models.CharField(max_length=255, blank=True, null=True)
+    razorpay_payment_id = models.CharField(max_length=255, blank=True, null=True)
+    razorpay_signature = models.CharField(max_length=255, blank=True, null=True)
+    paid_at = models.DateTimeField(null=True, blank=True)
+    released_at = models.DateTimeField(null=True, blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

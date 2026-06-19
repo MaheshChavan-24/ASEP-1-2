@@ -10,6 +10,13 @@ from .views import (
     ServiceRequestListView,
     ServiceRequestUpdateView,
 )
+from .views_payment import (
+    PayServiceRequestView,
+    RazorpayVerifyServiceRequestView,
+    WorkerCompleteServiceRequestView,
+    CompleteServiceRequestView,
+    RefundServiceRequestView,
+)
 
 urlpatterns = [
     # GET: List my docs, POST: Upload new doc
@@ -28,11 +35,17 @@ urlpatterns = [
     path('trade-profiles/detail/<int:pk>/', TradeProfileDetailView.as_view(), name='trade-profile-detail'),
 
     # --- SERVICE REQUESTS ---
-    # POST: Create a service request
+    # POST: Client requests service from a trade profile
     path('service-requests/', ServiceRequestCreateView.as_view(), name='service-request-create'),
-    # GET: List all service requests (for logged-in user)
-    path('service-requests/mine/', ServiceRequestListView.as_view(), name='my-service-requests'),
-    # PATCH: Update a service request status
+    # GET: List my service requests (client or worker)
+    path('service-requests/mine/', ServiceRequestListView.as_view(), name='service-requests-mine'),
+    # PATCH: Worker accepts/rejects
     path('service-requests/<int:pk>/', ServiceRequestUpdateView.as_view(), name='service-request-update'),
 
+    # --- SERVICE REQUEST PAYMENTS & ESCROW ---
+    path('service-requests/<int:pk>/pay/', PayServiceRequestView.as_view(), name='service-request-pay'),
+    path('service-requests/<int:pk>/verify-payment/', RazorpayVerifyServiceRequestView.as_view(), name='service-request-verify-payment'),
+    path('service-requests/<int:pk>/worker-complete/', WorkerCompleteServiceRequestView.as_view(), name='service-request-worker-complete'),
+    path('service-requests/<int:pk>/release-funds/', CompleteServiceRequestView.as_view(), name='service-request-release-funds'),
+    path('service-requests/<int:pk>/refund/', RefundServiceRequestView.as_view(), name='service-request-refund'),
 ]
