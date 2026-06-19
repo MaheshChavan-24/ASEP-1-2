@@ -188,6 +188,7 @@ function WorkerProfile({ lang, user, setUser, fetchCurrentUser }) {
   useEffect(() => { 
     fetchDocuments(); 
     if (fetchCurrentUser) fetchCurrentUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchDocuments = async () => {
@@ -704,23 +705,7 @@ export default function App() {
     'Computer / IT Repair': '💻',
   };
 
-  const tradeCategoryColors = {
-    'Plumbing': 'from-blue-500 to-blue-700',
-    'Carpentry': 'from-amber-500 to-amber-700',
-    'Electrical Work': 'from-yellow-400 to-yellow-600',
-    'Painting': 'from-pink-400 to-pink-600',
-    'Cleaning / Deep Clean': 'from-cyan-400 to-cyan-600',
-    'Appliance Repair': 'from-gray-500 to-gray-700',
-    'Gardening / Landscaping': 'from-green-400 to-green-600',
-    'Pest Control': 'from-red-400 to-red-600',
-    'Masonry / Tiling': 'from-orange-400 to-orange-600',
-    'AC & HVAC Servicing': 'from-sky-400 to-sky-600',
-    'Moving & Heavy Lifting': 'from-indigo-400 to-indigo-600',
-    'Welding / Fabrication': 'from-rose-500 to-rose-700',
-    'Interior Design Consultation': 'from-purple-400 to-purple-600',
-    'Security & CCTV Installation': 'from-slate-500 to-slate-700',
-    'Computer / IT Repair': 'from-teal-400 to-teal-600',
-  };
+
 
   const timeSlots = [
     '09:00 AM - 10:00 AM', '10:00 AM - 11:00 AM', '11:00 AM - 12:00 PM',
@@ -751,7 +736,7 @@ export default function App() {
               handler: async function (response) {
                 // Verify payment on backend
                 try {
-                  const verifyRes = await axios.post(`${JOB_API}${jobId}/verify-payment/`, {
+                  await axios.post(`${JOB_API}${jobId}/verify-payment/`, {
                     razorpay_payment_id: response.razorpay_payment_id,
                     razorpay_order_id: response.razorpay_order_id,
                     razorpay_signature: response.razorpay_signature
