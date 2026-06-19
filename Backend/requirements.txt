@@ -1,0 +1,10 @@
+Django>=4.0,<6.1
+djangorestframework
+django-cors-headers
+djangorestframework-simplejwt
+gunicorn
+dj-database-url
+whitenoise
+psycopg2-binary
+razorpay
+pillow

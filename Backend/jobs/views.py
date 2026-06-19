@@ -1,6 +1,8 @@
 from rest_framework import generics, permissions, status, serializers
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from django.utils import timezone
+from users.models import Notification
 from .models import Job, Review
 from .serializers import JobSerializer, ReviewSerializer
 from math import cos, asin, sqrt, pi
@@ -12,6 +14,8 @@ class JobCreateView(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
+        if self.request.user.verification_status != 'verified':
+            raise serializers.ValidationError({"error": "You must be verified to post a job."})
         serializer.save(client=self.request.user)
 
 class JobListView(generics.ListAPIView):
@@ -28,6 +32,9 @@ class AcceptJobView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, pk):
+        if request.user.verification_status != 'verified':
+            return Response({"error": "You must be verified to accept jobs."}, status=status.HTTP_403_FORBIDDEN)
+
         try:
             # Look for a job that is still pending
             job = Job.objects.get(pk=pk, status='pending')
@@ -36,12 +43,26 @@ class AcceptJobView(APIView):
             if job.client == request.user:
                 return Response({"error": "You cannot accept your own job."}, status=status.HTTP_400_BAD_REQUEST)
 
-            # Assign the worker and update status
+            # Assign the worker, set escrow to pending, and update status
             job.worker = request.user
             job.status = 'accepted'
+            job.escrow_status = 'pending'
             job.save()
+
+            # Create notification for client to fund the escrow
+            Notification.objects.create(
+                user=job.client,
+                title="Worker Matched - Payment Required",
+                message=f"Worker '{request.user.username}' accepted '{job.title}'. Please pay ₹{job.budget} to secure escrow and start work."
+            )
+            # Create notification for worker confirming they accepted
+            Notification.objects.create(
+                user=request.user,
+                title="Job Claimed Successfully",
+                message=f"You accepted '{job.title}'. Please wait for the client to fund the escrow before starting work."
+            )
             
-            return Response({"message": "Job accepted successfully!"}, status=status.HTTP_200_OK)
+            return Response({"message": "Job accepted successfully! Escrow payment is pending from the client."}, status=status.HTTP_200_OK)
         except Job.DoesNotExist:
             return Response({"error": "Job not found or already taken."}, status=status.HTTP_404_NOT_FOUND)
         
@@ -107,6 +128,69 @@ class WorkerReviewsView(generics.ListAPIView):
         # FIX: Filter by 'target_id' because we renamed 'worker' to 'target' in the model
         return Review.objects.filter(target_id=worker_id).order_by('-created_at')
     
+class WorkerCompleteJobView(APIView):
+    """
+    PATCH: Worker marks job as completed, waiting for client approval.
+    URL: /api/jobs/<pk>/worker-complete/
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def patch(self, request, pk):
+        try:
+            job = Job.objects.get(pk=pk)
+            
+            if job.worker != request.user:
+                return Response({"error": "You are not authorized to mark this job as completed."}, status=status.HTTP_403_FORBIDDEN)
+            
+            if job.status != 'accepted':
+                return Response({"error": "Job must be in accepted state to mark it as complete."}, status=status.HTTP_400_BAD_REQUEST)
+                
+            job.status = 'worker_completed'
+            job.save()
+
+            Notification.objects.create(
+                user=job.client,
+                title="Work Marked Completed",
+                message=f"Worker '{request.user.username}' has marked '{job.title}' as completed. Please review and release the escrow."
+            )
+            
+            return Response({"message": "Job marked as completed. Awaiting client approval."}, status=status.HTTP_200_OK)
+        except Job.DoesNotExist:
+            return Response({"error": "Job not found."}, status=status.HTTP_404_NOT_FOUND)
+
+
+class DisputeJobView(APIView):
+    """
+    PATCH: Client marks job as disputed after worker claims completion.
+    URL: /api/jobs/<pk>/dispute/
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def patch(self, request, pk):
+        try:
+            job = Job.objects.get(pk=pk)
+            
+            if job.client != request.user:
+                return Response({"error": "You are not authorized to dispute this job."}, status=status.HTTP_403_FORBIDDEN)
+            
+            if job.status != 'worker_completed':
+                return Response({"error": "Job must be marked as completed by the worker to open a dispute."}, status=status.HTTP_400_BAD_REQUEST)
+                
+            job.status = 'disputed'
+            job.save()
+
+            if job.worker:
+                Notification.objects.create(
+                    user=job.worker,
+                    title="Job Disputed",
+                    message=f"Client '{request.user.username}' has disputed your completion of '{job.title}'. Support will contact you shortly."
+                )
+            
+            return Response({"message": "Job marked as disputed. Our support team will review the escrow."}, status=status.HTTP_200_OK)
+        except Job.DoesNotExist:
+            return Response({"error": "Job not found."}, status=status.HTTP_404_NOT_FOUND)
+
+
 class ClientJobListView(generics.ListAPIView):
     """
     GET: List all jobs posted by the logged-in client.
@@ -134,15 +218,38 @@ class CompleteJobView(APIView):
             if job.client != request.user:
                 return Response({"error": "You are not authorized to complete this job."}, status=status.HTTP_403_FORBIDDEN)
             
-            # Logic Check: Only accepted jobs can be completed
-            # (Prevents completing a job that hasn't even been accepted yet)
-            if job.status != 'accepted':
-                return Response({"error": "Job must be accepted before it can be completed."}, status=status.HTTP_400_BAD_REQUEST)
+            # Logic Check: Only accepted or worker_completed jobs can be completed
+            if job.status not in ['accepted', 'worker_completed']:
+                return Response({"error": "Job must be accepted or marked as completed by the worker before it can be completed."}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Escrow Validation Check: Escrow must be funded (held) before completion
+            if job.escrow_status != 'held':
+                return Response({"error": "Escrow payment must be secured (held) before marking this job as completed. Please fund the escrow first."}, status=status.HTTP_400_BAD_REQUEST)
 
             job.status = 'completed'
+            job.escrow_status = 'released'
+            job.released_at = timezone.now()
             job.save()
+
+            # Release payout to the worker's wallet
+            worker = job.worker
+            worker.wallet_balance += job.budget
+            worker.save()
+
+            # Create notification for worker that funds are released
+            Notification.objects.create(
+                user=worker,
+                title="Escrow Released - Paid!",
+                message=f"Client '{request.user.username}' marked '{job.title}' as completed. ₹{job.budget} has been added to your wallet balance."
+            )
+            # Create notification for client confirming release
+            Notification.objects.create(
+                user=job.client,
+                title="Job Completed & Payment Released",
+                message=f"You marked '{job.title}' as completed. Escrow funds of ₹{job.budget} have been successfully transferred to '{worker.username}'."
+            )
             
-            return Response({"message": "Job marked as completed!"}, status=status.HTTP_200_OK)
+            return Response({"message": "Job marked as completed! Escrow funds have been successfully released to the worker.", "escrow_status": "released"}, status=status.HTTP_200_OK)
             
         except Job.DoesNotExist:
             return Response({"error": "Job not found."}, status=status.HTTP_404_NOT_FOUND)
@@ -159,7 +266,7 @@ class ActiveJobView(generics.RetrieveAPIView):
     def get_object(self):
         # Find the first job where this user is the worker and status is 'accepted'
         try:
-            return Job.objects.filter(worker=self.request.user, status='accepted').latest('created_at')
+            return Job.objects.filter(worker=self.request.user, status__in=['accepted', 'worker_completed', 'disputed']).latest('created_at')
         except Job.DoesNotExist:
             return None 
 

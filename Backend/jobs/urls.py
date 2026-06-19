@@ -1,5 +1,6 @@
 from django.urls import path
-from .views import JobCreateView, JobListView, AcceptJobView, CreateReviewView, WorkerReviewsView, ClientJobListView, CompleteJobView, ActiveJobView, WorkerJobHistoryView, MyReviewsView
+from .views import JobCreateView, JobListView, AcceptJobView, CreateReviewView, WorkerReviewsView, ClientJobListView, CompleteJobView, ActiveJobView, WorkerJobHistoryView, MyReviewsView, WorkerCompleteJobView, DisputeJobView
+from .views_payment import PayJobView, RazorpayVerifyView, WorkerPayoutView, RefundJobView
 
 urlpatterns = [
     # 1. Client Endpoint: Post a new job
@@ -25,6 +26,8 @@ urlpatterns = [
 
      # --- NEW: Mark job as completed ---
     path('<int:pk>/complete/', CompleteJobView.as_view(), name='job-complete'),
+    path('<int:pk>/worker-complete/', WorkerCompleteJobView.as_view(), name='worker-job-complete'),
+    path('<int:pk>/dispute/', DisputeJobView.as_view(), name='job-dispute'),
 
     # --- WORKER ACTIVE JOB ---
     path('active/', ActiveJobView.as_view(), name='active-job'),
@@ -32,6 +35,12 @@ urlpatterns = [
       # --- NEW: WORKER HISTORY ---
     path('worker-history/', WorkerJobHistoryView.as_view(), name='worker-history'),
 
-    #My reviews -->
+    # My reviews -->
     path('reviews/my-reviews/', MyReviewsView.as_view(), name='my-reviews'),
+
+    # --- ESCROW & PAYMENTS ENDPOINTS ---
+    path('<int:pk>/pay/', PayJobView.as_view(), name='job-pay'),
+    path('<int:pk>/verify-payment/', RazorpayVerifyView.as_view(), name='razorpay-verify'),
+    path('payout/', WorkerPayoutView.as_view(), name='worker-payout'),
+    path('<int:pk>/refund/', RefundJobView.as_view(), name='job-refund'),
 ]
