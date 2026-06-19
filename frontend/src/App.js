@@ -911,6 +911,48 @@ export default function App() {
     if (!jobData.title || !jobData.description) return alert("Title and Description are required.");
     if (!jobData.is_negotiable && (!jobData.budget || isNaN(jobData.budget))) return alert("Please enter a valid budget or check Negotiable.");
     
+    // --- Ethical Scanning Mechanism ---
+    const UNETHICAL_KEYWORDS = {
+      "illegal hacking": [
+        "\\bdDoS\\b", "\\bhack into\\b", "\\bsteal data\\b", "\\bexploit vulnerability\\b", 
+        "\\bsql injection\\b", "\\bmalware\\b", "\\bransomware\\b", "\\bphishing\\b"
+      ],
+      "academic dishonesty": [
+        "\\bdo my homework\\b", "\\bwrite my essay\\b", "\\btake my exam\\b", 
+        "\\bdo my assignment\\b", "\\bcheat on\\b", "\\bthesis writing service\\b"
+      ],
+      "fraud/scams": [
+        "\\bponzi\\b", "\\bpyramid scheme\\b", "\\bmoney laundering\\b", 
+        "\\bfake id\\b", "\\bstolen credit card\\b", "\\bcarding\\b"
+      ],
+      "harassment": [
+        "\\bdox\\b", "\\bdoxxing\\b", "\\bcyberbully\\b", "\\btroll targeted\\b", 
+        "\\bharass\\b", "\\bstalk\\b"
+      ],
+      "fake engagement/reviews": [
+        "\\bfake review\\b", "\\bbot followers\\b", "\\bbuy likes\\b", 
+        "\\bspam comments\\b", "\\bfake engagement\\b", "\\bmanipulate ratings\\b",
+        "\\bfake reviews\\b"
+      ],
+      "counterfeit goods": [
+        "\\bfake designer\\b", "\\bcounterfeit\\b", "\\bknockoff\\b", 
+        "\\breplica watches\\b"
+      ]
+    };
+    
+    const combinedText = `${jobData.title} ${jobData.description}`;
+    for (const [category, keywords] of Object.entries(UNETHICAL_KEYWORDS)) {
+      for (const pattern of keywords) {
+        const regex = new RegExp(pattern, 'i');
+        if (regex.test(combinedText)) {
+          const displayKeyword = pattern.replace(/\\b/g, '');
+          alert(`[REJECTED] This bounty cannot be posted as it violates our ethical guidelines.\nReason: Triggered by keyword/phrase '${displayKeyword}' (Category: ${category}).`);
+          return;
+        }
+      }
+    }
+    // ----------------------------------
+
     const finalJobData = { ...jobData };
     if (finalJobData.is_negotiable) finalJobData.budget = 0;
 
