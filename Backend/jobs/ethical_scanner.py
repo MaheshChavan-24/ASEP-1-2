@@ -43,7 +43,7 @@ def check_bounty_ethics(title: str, description: str) -> bool:
                 # Clean up the regex pattern for display
                 display_keyword = keyword_pattern.replace(r'\b', '')
                 print(f"[REJECTED] This bounty cannot be posted as it violates our ethical guidelines.")
-                print(f"   Reason: Triggered by keyword/phrase '{display_keyword}' (Category: {category}).\n")
+                # print(f"   Reason: Triggered by keyword/phrase '{display_keyword}' (Category: {category}).\n")
                 return False
                 
     print(f"[ACCEPTED] Bounty posted successfully.\n")
