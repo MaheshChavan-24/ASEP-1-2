@@ -963,12 +963,12 @@ export default function App() {
     };
 
     const combinedText = `${jobData.title} ${jobData.description}`;
-    for (const [category, keywords] of Object.entries(UNETHICAL_KEYWORDS)) {
+    for (const keywords of Object.values(UNETHICAL_KEYWORDS)) {
       for (const pattern of keywords) {
         const regex = new RegExp(pattern, 'i');
         if (regex.test(combinedText)) {
           const displayKeyword = pattern.replace(/\\b/g, '');
-          alert(`[REJECTED] This bounty cannot be posted as it violates our ethical guidelines.`);
+          alert(`[REJECTED] This bounty cannot be posted as it violates our ethical guidelines. (Triggered by: ${displayKeyword})`);
           return;
         }
       }
